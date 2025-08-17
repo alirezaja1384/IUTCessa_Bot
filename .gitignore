@@ -7,11 +7,14 @@ __pycache__/
 core/__pycache__/
 kmkyar/__pycache__/
 techstack/__pycache__/
+interface/__pycache__/
 
 # OS or editor files
 *.log
 *.swp
 .DS_Store
+.vscode/
+.venv/
 
 # User data files
 *.pkl
