@@ -172,7 +172,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("stop", stop))
     app.add_handler(CommandHandler("save", save_command))
     app.add_handler(CommandHandler('bot', github_repo_send))
-    app.add_handler(CommandHandler("IDCheck", IDCheck))
+    app.add_handler(CommandHandler("idcheck", IDCheck))
 
     # basic response
     app.add_handler(CommandHandler("qdc", qdc))
