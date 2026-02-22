@@ -1,3 +1,4 @@
+import random
 from telegram import Update
 from telegram.ext import ContextTypes
 from .anti_spam import is_spamming_globally
@@ -214,3 +215,56 @@ async def ask(update: Update, context: ContextTypes.DEFAULT_TYPE):
             #print(f"MK failed, now no parse:\n{opinion}")
             if update.message:
                 await update.message.reply_text(text=opinion)
+
+
+FACE_EMOJIS = [
+    "🤔",
+    "😊",
+    "😂",
+    "😍",
+    "😘",
+    "😡",
+    "😭",
+    "😡",
+]
+
+
+async def random_face_emoji(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+):
+    user_id = update.effective_user.id
+    if update.effective_chat.type == "private":
+        return
+    if update.effective_chat.id not in ALLOWED_GROUPS:
+        return
+    if await is_spamming_globally(update, user_id):
+        return
+
+    emoji = random.choice(FACE_EMOJIS)
+    user = update.effective_user
+    mention = (
+        f'<a href="tg://user?id={user.id}">'
+        f'{("@"+user.username) if user.username else str(user.id)}</a>'
+    )
+
+    if update.message.reply_to_message:
+        try:
+            await context.bot.delete_message(
+                chat_id=update.effective_chat.id,
+                message_id=update.effective_message.message_id,
+            )
+        except Exception:
+            pass
+
+        sent = await update.message.reply_text(
+            emoji,
+            reply_to_message_id=update.message.reply_to_message.message_id,
+        )
+    else:
+        sent = await update.message.reply_text(emoji)
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        reply_to_message_id=sent.message_id,
+        text=mention,
+        parse_mode="HTML",
+    )
