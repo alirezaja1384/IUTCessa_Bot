@@ -241,11 +241,6 @@ async def random_face_emoji(
         return
 
     emoji = random.choice(FACE_EMOJIS)
-    user = update.effective_user
-    mention = (
-        f'<a href="tg://user?id={user.id}">'
-        f'{("@"+user.username) if user.username else str(user.id)}</a>'
-    )
 
     if update.message.reply_to_message:
         try:
@@ -261,10 +256,5 @@ async def random_face_emoji(
             reply_to_message_id=update.message.reply_to_message.message_id,
         )
     else:
-        sent = await update.message.reply_text(emoji)
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        reply_to_message_id=sent.message_id,
-        text=mention,
-        parse_mode="HTML",
-    )
+        await update.message.reply_text(emoji)
+
