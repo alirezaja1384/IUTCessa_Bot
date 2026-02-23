@@ -1,4 +1,7 @@
-from telegram import Update
+import asyncio
+from collections import defaultdict
+import random
+from telegram import Message, Update
 from telegram.ext import ContextTypes
 from .anti_spam import is_spamming_globally
 from .ai import ai_summarize, ai_opinion
@@ -214,3 +217,51 @@ async def ask(update: Update, context: ContextTypes.DEFAULT_TYPE):
             #print(f"MK failed, now no parse:\n{opinion}")
             if update.message:
                 await update.message.reply_text(text=opinion)
+
+DICE_SUCCESS_VALUES = {
+    "🎲": [6],
+    "🎯": [6],
+    "🎳": [6],
+    "🎰": [64],
+    "⚽": [4, 5],
+    "🏀": [4, 5], 
+}
+DICE_EMOJIS = list(DICE_SUCCESS_VALUES.keys())
+
+_dice_locks = defaultdict(asyncio.Lock)
+
+async def random_dice_emoji(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+):
+    user_id = update.effective_user.id
+    if update.effective_chat.type == "private":
+        return
+    if update.effective_chat.id not in ALLOWED_GROUPS:
+        return
+    if await is_spamming_globally(update, user_id):
+        return
+
+    lock = _dice_locks[update.effective_chat.id]
+
+    if lock.locked():
+        await update.message.reply_text("دارم تاس میندازما!")
+        return
+
+    context.application.create_task(
+        _reply_dice(update.message, lock)
+    )
+
+async def _reply_dice(reply_to: Message, lock: asyncio.Lock):
+    async with lock:
+        emoji = random.choice(DICE_EMOJIS)
+        msg = await reply_to.reply_dice(emoji=emoji)
+        
+        value = int(msg.dice.value)
+        is_success = value in DICE_SUCCESS_VALUES[emoji]
+
+        await asyncio.sleep(3)
+
+        if is_success:
+            await msg.reply_text("دارن میزننننن!")
+        else:
+            await msg.reply_text("نمیزنن بابا!")
