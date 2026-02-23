@@ -228,7 +228,7 @@ DICE_SUCCESS_VALUES = {
 }
 DICE_EMOJIS = list(DICE_SUCCESS_VALUES.keys())
 
-_dice_locks = defaultdict(asyncio.Lock)
+_dice_locks = defaultdict[int, asyncio.Lock](asyncio.Lock)
 
 async def random_dice_emoji(
     update: Update, context: ContextTypes.DEFAULT_TYPE
